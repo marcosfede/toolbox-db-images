@@ -54,6 +54,7 @@ Bigtable, Couchbase, Dgraph, MongoDB, Neo4j, Redis, Redshift, SQLite, TiDB, Valk
 | [PostgreSQL](#postgresql) | SQL | Open-source object-relational database | Yes |
 | [Redis](#redis) | Cache/NoSQL | In-memory data structure store | No |
 | [Redshift](#redshift) | Analytics | Amazon's data warehouse service | No |
+| [Snowflake](#snowflake) | Analytics | Cloud data warehouse platform | Custom |
 | [Spanner](#spanner) | SQL | Globally distributed relational database | Yes |
 | [SQL Server](#sql-server) | SQL | Microsoft relational database | Yes |
 | [SQLite](#sqlite) | SQL | Lightweight file-based database | No |
@@ -1226,6 +1227,56 @@ docker run --rm -i \
 | `POSTGRES_USER` | Yes | Username | - | `awsuser` |
 | `POSTGRES_PASSWORD` | Yes | Password | - | `your-password` |
 | `REDSHIFT_TOOLS_FILE` | Yes | Path to tools configuration YAML | - | `/path/to/redshift.yaml` |
+
+---
+
+## Snowflake
+
+Snowflake is a cloud data warehouse platform with support for password and key-pair authentication.
+
+### Building the Image
+
+```bash
+cd custom-images/snowflake-mcp
+docker build -t mcp-snowflake:local .
+```
+
+### Docker Command (Password Mode)
+
+```bash
+docker run --rm -it \
+  -e SNOWFLAKE_PASSWORD="$SNOWFLAKE_PASSWORD" \
+  mcp-snowflake:local \
+  --account myaccount \
+  --user myuser \
+  --warehouse COMPUTE_WH \
+  --database ANALYTICS_DB \
+  --schema PUBLIC
+```
+
+### Docker Command (Key-Pair Mode)
+
+```bash
+docker run --rm -it \
+  -e SNOWFLAKE_PRIVATE_KEY="$SNOWFLAKE_PRIVATE_KEY" \
+  -e SNOWFLAKE_PRIVATE_KEY_FILE_PWD="$KEY_PASSPHRASE" \
+  mcp-snowflake:local \
+  --account myaccount \
+  --user svc_mcp_user \
+  --warehouse COMPUTE_WH \
+  --database ANALYTICS_DB \
+  --schema PUBLIC
+```
+
+### Environment Variables
+
+| Variable | Required | Description | Default | Example |
+|----------|----------|-------------|---------|---------|
+| `SNOWFLAKE_PASSWORD` | For password auth | Password for authentication | - | `your-password` |
+| `SNOWFLAKE_PRIVATE_KEY` | For key-pair auth | Private key PEM content | - | `$(cat rsa_key.p8)` |
+| `SNOWFLAKE_PRIVATE_KEY_FILE_PWD` | Optional | Passphrase for encrypted private key | - | `your-passphrase` |
+
+**Note**: Authentication mode is auto-detected based on provided credentials. Transport defaults to `stdio`.
 
 ---
 
